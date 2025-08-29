@@ -30,11 +30,11 @@ import re
 from contextlib import suppress
 from enum import StrEnum
 from pathlib import Path
+from typing import override
 
 import attrs
 import trio
 from PySide6 import QtCore, QtGui, QtWidgets
-from typing_extensions import override
 
 from onelauncher.game_launcher_local_config import (
     GameLauncherLocalConfig,

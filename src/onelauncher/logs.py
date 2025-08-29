@@ -6,9 +6,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from platform import platform
 from types import TracebackType
-from typing import Final
-
-from typing_extensions import override
+from typing import Final, override
 
 from .__about__ import __title__, __version__, version_parsed
 from .config import platform_dirs

@@ -1,11 +1,10 @@
 import logging
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import Any, override
 
 import outcome
 import trio
 from PySide6 import QtCore, QtWidgets
-from typing_extensions import override
 
 logger = logging.getLogger(__name__)
 

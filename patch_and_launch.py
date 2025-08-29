@@ -11,14 +11,12 @@ from __future__ import annotations
 import asyncio
 import logging
 import subprocess
-from pathlib import Path
 
 from onelauncher.config_manager import ConfigManager
 from onelauncher.game_config import GameConfig, GameType
 from onelauncher.network.game_services_info import GameServicesInfo
 from onelauncher.resources import data_dir
 from onelauncher.standard_game_launcher import get_standard_game_launcher_path
-
 
 logging.basicConfig(
     filename="patch_and_launch.log",

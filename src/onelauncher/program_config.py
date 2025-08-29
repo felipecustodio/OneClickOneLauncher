@@ -1,8 +1,8 @@
 from enum import Enum
+from typing import override
 
 import attrs
 from packaging.version import Version
-from typing_extensions import override
 
 from .__about__ import __title__
 from .config import Config, config_field
