@@ -139,17 +139,52 @@ OneLauncher implements a sophisticated styling system inspired by Tailwind CSS, 
 
 ### QSS Class System
 
+OneLauncher uses a system similar to [Tailwind CSS](https://tailwindcss.com/) for styling UIs responsively. This system provides a utility-first approach to styling widgets.
+
 #### How It Works
+
+The QSS class system works through Qt's dynamic property system:
+
+1. **Dynamic Property**: The `qssClass` dynamic property is added to widgets that need styling
+2. **Property Type**: This property should always be of the type **StringList** in Qt Designer
+3. **Class Selection**: Each string in `qssClass` is a "class" that affects the widget's styling
+4. **QSS Generation**: Classes work by being selected in dynamically generated [Qt Style Sheets](https://doc.qt.io/qt-6/stylesheet.html)
+5. **Live Preview**: Changes can be previewed live in pyside6-designer when using the `onelauncher designer` command
 
 ```python
 # Dynamic property used for styling, like the class attribute in HTML
 CLASS_PROPERTY: str = "qssClass"
 ```
 
-1. **Dynamic Properties**: Widgets use the `qssClass` dynamic property (StringList type)
-2. **Class-Based Styling**: Each string in the list acts as a CSS class
-3. **Responsive Sizing**: Classes set sizes relative to system font size
-4. **Live Preview**: Changes visible immediately in Qt Designer
+#### Adding QSS Classes in Qt Designer
+
+1. Select the widget you want to style
+2. In the Property Editor, right-click and select "Add Dynamic Property"
+3. Choose "StringList" as the property type
+4. Set the property name to `qssClass`
+5. Add class names (one per line) such as:
+   - `px-4` (padding-x: 1rem)
+   - `py-2` (padding-y: 0.5rem)  
+   - `text-lg` (font-size: large)
+
+#### Supported Class Types
+
+The classes are mainly used to set sizes and margins relative to the system font size. OneLauncher currently supports the following Tailwind CSS-inspired class types:
+
+| Class Type | Purpose | Tailwind Documentation |
+|------------|---------|------------------------|
+| **Padding** | Internal spacing around content | [Padding Docs](https://tailwindcss.com/docs/padding) |
+| **Margin** | External spacing around element | [Margin Docs](https://tailwindcss.com/docs/margin) |
+| **Width** | Element width sizing | [Width Docs](https://tailwindcss.com/docs/width) |
+| **Min-Width** | Minimum width constraints | [Min-Width Docs](https://tailwindcss.com/docs/min-width) |
+| **Max-Width** | Maximum width constraints | [Max-Width Docs](https://tailwindcss.com/docs/max-width) |
+| **Height** | Element height sizing | [Height Docs](https://tailwindcss.com/docs/height) |
+| **Min-Height** | Minimum height constraints | [Min-Height Docs](https://tailwindcss.com/docs/min-height) |
+| **Max-Height** | Maximum height constraints | [Max-Height Docs](https://tailwindcss.com/docs/max-height) |
+| **Font-Size** | Text size styling | [Font-Size Docs](https://tailwindcss.com/docs/font-size) |
+| **Icon-Size** | Custom icon sizing | OneLauncher specific |
+
+See the [Tailwind Utility-First Documentation](https://tailwindcss.com/docs/utility-first) for more information about the utility-first approach to styling.
 
 #### Supported Style Classes
 
@@ -176,7 +211,9 @@ SPACING: Final[dict[str, Rem]] = {
 | **Font Size** | Text sizing | `text-sm`, `text-lg`, `text-xl` |
 | **Icon Size** | Icon dimensions | `icon-sm`, `icon-lg` |
 
-#### Usage Example
+#### Example Usage in Qt Designer
+
+When designing a UI in Qt Designer with the QSS class system:
 
 ```xml
 <!-- In .ui file -->
@@ -190,6 +227,13 @@ SPACING: Final[dict[str, Rem]] = {
     </property>
 </widget>
 ```
+
+This button will have:
+- `px-4`: 1rem horizontal padding
+- `py-2`: 0.5rem vertical padding  
+- `text-lg`: Large font size
+
+The `stdset="0"` attribute indicates this is a dynamic property, not a standard Qt property.
 
 ### Style Generation
 
@@ -409,49 +453,71 @@ class CustomStylesheetPlugin(QtDesigner.QDesignerCustomWidgetInterface):
 
 ### Creating New UI Components
 
-1. **Design in Qt Designer**
-   ```bash
-   onelauncher designer  # Launch Qt Designer with OneLauncher plugins
-   ```
+#### 1. Design in Qt Designer
 
-2. **Compile UI to Python**
-   ```bash
-   pyside6-uic src/onelauncher/ui/example_window.ui -o src/onelauncher/ui/example_window_uic.py
-   ```
+User interfaces are defined in `.ui` files that can be visually edited in pyside6-designer. OneLauncher provides a convenient command to launch Qt Designer with all plugins enabled:
 
-3. **Create Window Class**
-   ```python
-   from .ui.example_window_uic import Ui_exampleWindow
-   
-   class ExampleWindow(FramelessQDialogWithStylePreview):
-       def __init__(self):
-           super().__init__()
-           self.ui = Ui_exampleWindow()
-           self.ui.setupUi(self)
-   ```
+```bash
+onelauncher designer  # Launch Qt Designer with OneLauncher plugins enabled
+```
+
+This command ensures that:
+- OneLauncher's custom widgets are available in the designer
+- The QSS class system can be previewed live
+- All styling functionality works correctly during design
+
+#### 2. Compile UI to Python
+
+UI files must be compiled into Python modules to be used in OneLauncher. This is done using the `pyside6-uic` tool:
+
+```bash
+pyside6-uic src/onelauncher/ui/example_window.ui -o src/onelauncher/ui/example_window_uic.py
+```
+
+**Important**: Replace "example_window" with the actual name of the UI file being updated. The compiled Python file should always have the `_uic.py` suffix to distinguish it from the hand-written window classes.
+
+#### 3. Create Window Class
+
+```python
+from .ui.example_window_uic import Ui_exampleWindow
+
+class ExampleWindow(FramelessQDialogWithStylePreview):
+    def __init__(self):
+        super().__init__()
+        self.ui = Ui_exampleWindow()
+        self.ui.setupUi(self)
+```
 
 ### Styling Workflow
 
-1. **Add QSS Classes in Designer**
-   - Select widget in Qt Designer
-   - Add dynamic property `qssClass` (StringList type)
-   - Add class names like `px-4`, `py-2`, `text-lg`
+#### 1. Add QSS Classes in Qt Designer
 
-2. **Preview Styles**
-   - Styles update live in Qt Designer
-   - Test different responsive breakpoints
-   - Verify cross-platform appearance
+- Launch Qt Designer with OneLauncher plugins: `onelauncher designer`
+- Select the widget you want to style
+- Add dynamic property `qssClass` with type **StringList**
+- Add class names like `px-4`, `py-2`, `text-lg` (one class per line)
+- Classes update live in Qt Designer for immediate preview
 
-3. **Custom Styles**
-   ```python
-   # Add custom styles to ApplicationStyle.generate_stylesheet()
-   stylesheet += """
-   QWidget#myCustomWidget {
-       background-color: palette(window);
-       border-radius: 4px;
-   }
-   """
-   ```
+#### 2. Preview Styles
+
+- Styles update live in Qt Designer when using OneLauncher plugins
+- Test different responsive breakpoints by resizing the designer window
+- Verify cross-platform appearance with different system themes
+- Use Font Awesome icons through the qtawesome integration
+
+#### 3. Custom Styles
+
+For styles not covered by the Tailwind-like classes, add custom QSS:
+
+```python
+# Add custom styles to ApplicationStyle.generate_stylesheet()
+stylesheet += """
+QWidget#myCustomWidget {
+    background-color: palette(window);
+    border-radius: 4px;
+}
+"""
+```
 
 ### Testing UI Changes
 
