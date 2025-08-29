@@ -29,14 +29,12 @@ from __future__ import annotations
 
 import logging
 import os
-import pathlib
 from collections.abc import Generator
 from pathlib import Path
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, override
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree  # type: ignore[import-untyped]
-from typing_extensions import override
 
 if TYPE_CHECKING:
     from _typeshed import StrPath
@@ -58,21 +56,16 @@ class CaseInsensitiveAbsolutePath(Path):
     addon folders or anything else used by the games or in the WINE prefixes.
     """
 
-    _flavour = (
-        pathlib._windows_flavour  # type: ignore[attr-defined]
-        if os.name == "nt"
-        else pathlib._posix_flavour  # type: ignore[attr-defined]
-    )
-
-    def __new__(cls, *pathsegments: StrPath) -> Self:
+    def __init__(self, *pathsegments: StrPath) -> None:
         normal_path = Path(*pathsegments)
         if not normal_path.is_absolute():
             raise ValueError("Path is not absolute")
         # Windows filesystems are already case-insensitive
         if os.name == "nt":
-            return super().__new__(cls, *pathsegments)
-        path = cls._get_real_path_from_fully_case_insensitive_path(normal_path)
-        return super().__new__(cls, path)
+            super().__init__(*pathsegments)
+        else:
+            path = self._get_real_path_from_fully_case_insensitive_path(normal_path)
+            super().__init__(os.fspath(path))
 
     @classmethod
     def _get_real_path_from_fully_case_insensitive_path(
