@@ -1,13 +1,11 @@
-import importlib.metadata
-
 from packaging.version import Version
 
-# Metadata has been temporily manually entered to work with Nuitka.
+# Metadata has been manually entered to work with compiled executables (Nuitka/PyInstaller).
 # See https://github.com/Nuitka/Nuitka/issues/2965
+# importlib.metadata is not available in compiled executables, so we use hardcoded values.
 
-# metadata = importlib.metadata.metadata(__package__)   # noqa: ERA001
 __title__ = "OneLauncher"
-__version__ = importlib.metadata.version(__package__)
+__version__ = "2.0.2"
 __description__ = "The OneLauncher to rule them all"
 __project_url__ = "https://github.com/JuneStepp/OneLauncher"
 __author__ = "June Stepp"
