@@ -1,0 +1,60 @@
+name: Build One Click Launcher
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          activate-environment: true
+
+      - name: Sync dependencies
+        run: uv sync --locked --no-dev
+
+      - name: Install PyInstaller
+        run: uv pip install pyinstaller
+
+      - name: Compile run_patch_client
+        run: gcc src/run_patch_client/run_patch_client.c -o src/run_patch_client/run_ptch_client.exe
+
+      - name: Build executable with PyInstaller
+        run: pyinstaller patch_and_launch.spec
+
+      - name: Verify build output and list files
+        run: |
+          Write-Host "Contents of dist directory:"
+          Get-ChildItem -Path dist -Recurse
+          if (Test-Path "dist/patch_and_launch.exe") {
+            Write-Host "✓ Found dist/patch_and_launch.exe"
+            exit 0
+          }
+          Write-Error "No executable found in dist directory!"
+          exit 1
+        shell: pwsh
+
+      - name: Create Release and Upload Assets
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: oneclick-${{ github.run_number }}
+          name: OneClick ${{ github.run_number }} (${{ github.sha }})
+          draft: false
+          prerelease: false
+          files: |
+            dist/patch_and_launch.exe
