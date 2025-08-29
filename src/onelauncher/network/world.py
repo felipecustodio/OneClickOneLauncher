@@ -1,12 +1,11 @@
 import logging
-from typing import Any, Final
+from typing import Any, Final, override
 from urllib.parse import urlparse, urlunparse
 
 import httpx
 import xmlschema
 from asyncache import cached
 from cachetools import TTLCache
-from typing_extensions import override
 
 from ..resources import data_dir
 from .httpx_client import get_httpx_client

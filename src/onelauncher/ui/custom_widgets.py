@@ -1,6 +1,7 @@
+from typing import override
+
 from PySide6 import QtCore, QtGui, QtWidgets
 from qframelesswindow import FramelessDialog, FramelessMainWindow
-from typing_extensions import override
 
 from onelauncher.qtapp import get_qapp
 from onelauncher.ui.qtdesigner.custom_widgets import (

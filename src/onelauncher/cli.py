@@ -12,7 +12,7 @@ from collections.abc import Awaitable, Callable, Iterator
 from enum import StrEnum
 from functools import partial
 from pathlib import Path
-from typing import Annotated, Optional, assert_never
+from typing import Annotated, Optional, assert_never, override
 
 import attrs
 import click
@@ -20,7 +20,6 @@ import rich
 import typer
 from PySide6 import QtCore, QtWidgets
 from typer.core import TyperGroup as TyperGroupBase
-from typing_extensions import override
 
 import onelauncher
 

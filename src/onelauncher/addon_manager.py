@@ -50,6 +50,7 @@ from typing import (
     TypeAlias,
     assert_never,
     overload,
+    override,
 )
 from xml.dom import EMPTY_NAMESPACE
 from xml.dom.minicompat import NodeList
@@ -61,7 +62,6 @@ import defusedxml.minidom  # type: ignore[import-untyped]
 import qtawesome
 from httpx import HTTPError
 from PySide6 import QtCore, QtGui, QtWidgets
-from typing_extensions import override
 
 from onelauncher.network.httpx_client import get_httpx_client_sync
 from onelauncher.qtapp import get_qapp
