@@ -1,12 +1,12 @@
 import logging
-from typing import Any
+from typing import Any, override
 from urllib.parse import urlparse, urlunparse
 
 import httpx
 import xmlschema
 from asyncache import cached
 from cachetools import TTLCache
-from typing_extensions import override
+from defusedxml import ElementTree  # type: ignore[import-untyped]
 
 from ..resources import data_dir
 from .httpx_client import get_httpx_client
@@ -144,16 +144,15 @@ class World:
             return schema.to_dict(response.text)  # type: ignore[return-value]
         else:
             # Fallback: parse XML manually without schema validation
-            import xml.etree.ElementTree as ET
             try:
-                root = ET.fromstring(response.text)
+                root = ElementTree.fromstring(response.text)
                 result = {}
                 for child in root:
                     result[child.tag] = child.text or ""
                 return result
-            except ET.ParseError as e:
+            except ElementTree.ParseError as e:
                 logger.warning(f"Failed to parse world status XML without schema: {e}")
-                raise WorldUnavailableError(f"{self} world status XML is invalid")
+                raise WorldUnavailableError(f"{self} world status XML is invalid") from e
 
     @override
     def __str__(self) -> str:
