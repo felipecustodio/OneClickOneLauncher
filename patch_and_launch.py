@@ -58,7 +58,7 @@ async def patch_game(
     if game_config.high_res_enabled:
         args.append("--highres")
 
-    for phase in ("--filesonly", "--filesonly", "--dataonly"):
+    for phase in ("--filesonly", "--dataonly"):
         subprocess.run(
             base_cmd + [" ".join([*args, phase])],
             check=True,
