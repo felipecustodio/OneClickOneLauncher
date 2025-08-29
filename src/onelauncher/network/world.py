@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Final
+from typing import Any
 from urllib.parse import urlparse, urlunparse
 
 import httpx
@@ -35,9 +35,7 @@ class WorldStatus:
 
 
 class World:
-    _WORLD_STATUS_SCHEMA: Final = xmlschema.XMLSchema(
-        data_dir / "network" / "schemas" / "world_status.xsd"
-    )
+    _cached_world_status_schema: xmlschema.XMLSchema | None = None
 
     def __init__(
         self,
@@ -50,6 +48,18 @@ class World:
         self._chat_server_url = chat_server_url
         self._status_server_url = status_server_url
         self._gls_datacenter_service = gls_datacenter_service
+
+    @property
+    def _world_status_schema(self) -> xmlschema.XMLSchema | None:
+        """Lazily load the world status schema. Returns None if schema file is not found."""
+        if World._cached_world_status_schema is None:
+            try:
+                schema_path = data_dir / "network" / "schemas" / "world_status.xsd"
+                World._cached_world_status_schema = xmlschema.XMLSchema(schema_path)
+            except (FileNotFoundError, OSError, xmlschema.XMLSchemaException) as e:
+                logger.warning(f"World status schema file not found or invalid: {e}")
+                # Keep as None to indicate schema is not available
+        return World._cached_world_status_schema
 
     @property
     def name(self) -> str:
@@ -91,7 +101,7 @@ class World:
 
         Returns:
             dict: Dictionary representation of world status.
-                  See `self._WORLD_STATUS_SCHEMA` schema file for what to expect.
+                  See schema file at network/schemas/world_status.xsd for expected format.
         """
         response = await get_httpx_client(status_server_url).get(status_server_url)
 
@@ -128,7 +138,22 @@ class World:
 
         response.raise_for_status()
 
-        return self._WORLD_STATUS_SCHEMA.to_dict(response.text)  # type: ignore[return-value]
+        # Use schema for validation and parsing if available, otherwise parse manually
+        schema = self._world_status_schema
+        if schema is not None:
+            return schema.to_dict(response.text)  # type: ignore[return-value]
+        else:
+            # Fallback: parse XML manually without schema validation
+            import xml.etree.ElementTree as ET
+            try:
+                root = ET.fromstring(response.text)
+                result = {}
+                for child in root:
+                    result[child.tag] = child.text or ""
+                return result
+            except ET.ParseError as e:
+                logger.warning(f"Failed to parse world status XML without schema: {e}")
+                raise WorldUnavailableError(f"{self} world status XML is invalid")
 
     @override
     def __str__(self) -> str:
