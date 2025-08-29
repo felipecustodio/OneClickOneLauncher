@@ -60,7 +60,7 @@ async def patch_game(
 
     for phase in ("--filesonly", "--dataonly"):
         subprocess.run(
-            base_cmd + [" ".join([*args, phase])],
+            base_cmd + args + [phase],
             check=True,
             cwd=game_config.game_directory,
         )
