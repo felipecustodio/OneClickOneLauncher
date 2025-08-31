@@ -1,4 +1,13 @@
 # -*- mode: python ; coding: utf-8 -*-
+#
+# DEPRECATED: This PyInstaller spec file is deprecated.
+# 
+# Please use the new decoupled version:
+# oneclick_launcher/standalone.spec
+#
+# The new version creates a much smaller executable (~7MB vs ~50MB)
+# and doesn't depend on the full OneLauncher package.
+#
 
 block_cipher = None
 
