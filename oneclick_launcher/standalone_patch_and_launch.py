@@ -170,6 +170,12 @@ class SimplePatchClient:
             logging.info(f"Patch phase {phase} completed successfully")
             return True
             
+        except OSError as e:
+            if "Exec format error" in str(e):
+                logging.error("Cannot execute Windows patch client on this platform")
+            else:
+                logging.error(f"Failed to execute patch client: {e}")
+            return False
         except subprocess.CalledProcessError as e:
             logging.error(f"Patch phase {phase} failed: {e}")
             logging.error(f"Stdout: {e.stdout}")
