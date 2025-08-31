@@ -146,7 +146,29 @@ def get_system_locale() -> OneLauncherLocale | None:
 
 
 def get_default_locale() -> OneLauncherLocale:
-    return get_system_locale() or get_available_locales()["en-US"]
+    system_locale = get_system_locale()
+    if system_locale:
+        return system_locale
+    
+    available_locales = get_available_locales()
+    
+    # Try to use en-US if available
+    if "en-US" in available_locales:
+        return available_locales["en-US"]
+    
+    # Fall back to first available locale
+    if available_locales:
+        return next(iter(available_locales.values()))
+    
+    # If no locales are available, create a minimal fallback
+    # This should only happen in broken installations
+    fallback_data_dir = get_data_dir() / "locale" / "en-US"
+    return OneLauncherLocale(
+        lang_tag="en-US",
+        data_dir=fallback_data_dir,
+        display_name="English",
+        game_language_name="English"
+    )
 
 
 def get_game_dir_available_locales(game_dir: Path) -> list[OneLauncherLocale]:
