@@ -144,3 +144,56 @@ def test_allow_unknown_config_keys(tmp_path: Path) -> None:
     onelauncher.config_manager.read_config_file(
         config_class=ProgramConfig, config_file_path=config_path
     )
+
+
+def test_cattrs_exception_handling_coverage(tmp_path: Path) -> None:
+    """Test that various cattrs exceptions are properly caught and wrapped."""
+    from unittest.mock import Mock, patch
+    import cattrs
+    from onelauncher.config_manager import read_config_file, ConfigFileParseError
+    
+    # Create a temporary config file
+    config_path = tmp_path / "test_config.toml"
+    config_path.write_text('''
+#:version 2.0
+default_locale = "en"
+''')
+    
+    # Test StructureHandlerNotFoundError
+    with patch('onelauncher.config_manager.get_converter') as mock_get_converter:
+        mock_converter = Mock()
+        mock_converter.structure.side_effect = cattrs.StructureHandlerNotFoundError(
+            "Unsupported type", ProgramConfig
+        )
+        mock_get_converter.return_value = mock_converter
+        
+        with pytest.raises(ConfigFileParseError) as exc_info:
+            read_config_file(config_class=ProgramConfig, config_file_path=config_path)
+        
+        assert isinstance(exc_info.value.__cause__, cattrs.StructureHandlerNotFoundError)
+    
+    # Test ForbiddenExtraKeysError  
+    with patch('onelauncher.config_manager.get_converter') as mock_get_converter:
+        mock_converter = Mock()
+        mock_converter.structure.side_effect = cattrs.ForbiddenExtraKeysError(
+            "Found extra keys", ProgramConfig, {'extra_key'}
+        )
+        mock_get_converter.return_value = mock_converter
+        
+        with pytest.raises(ConfigFileParseError) as exc_info:
+            read_config_file(config_class=ProgramConfig, config_file_path=config_path)
+        
+        assert isinstance(exc_info.value.__cause__, cattrs.ForbiddenExtraKeysError)
+    
+    # Test IterableValidationError
+    with patch('onelauncher.config_manager.get_converter') as mock_get_converter:
+        mock_converter = Mock()
+        mock_converter.structure.side_effect = cattrs.IterableValidationError(
+            "Iterable validation failed", [ValueError("mock error")], ProgramConfig
+        )
+        mock_get_converter.return_value = mock_converter
+        
+        with pytest.raises(ConfigFileParseError) as exc_info:
+            read_config_file(config_class=ProgramConfig, config_file_path=config_path)
+        
+        assert isinstance(exc_info.value.__cause__, cattrs.IterableValidationError)
