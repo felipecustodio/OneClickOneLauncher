@@ -1,4 +1,17 @@
-"""Patch and launch LOTRO in one step.
+"""DEPRECATED: Patch and launch LOTRO in one step.
+
+⚠️  DEPRECATION WARNING: This file is deprecated and will be removed in a future version.
+    
+    The exe generation has been decoupled from the main OneLauncher project.
+    Please use the new standalone version located in:
+    
+    oneclick_launcher/standalone_patch_and_launch.py
+    
+    Benefits of the new version:
+    - Much smaller executable size (7MB vs 50+MB)
+    - No dependency on the full OneLauncher package
+    - Fewer download errors
+    - Faster build times
 
 This helper script reads existing OneLauncher configuration to find the
 installed game, runs the game's patch client and then starts the standard

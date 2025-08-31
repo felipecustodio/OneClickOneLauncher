@@ -1,0 +1,59 @@
+name: Build One Click Launcher
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller platformdirs defusedxml httpx
+
+      - name: Compile run_patch_client
+        run: gcc oneclick_launcher/run_patch_client/run_patch_client.c -o oneclick_launcher/run_patch_client/run_ptch_client.exe
+
+      - name: Build executable with PyInstaller
+        run: |
+          cd oneclick_launcher
+          pyinstaller standalone.spec
+
+      - name: Verify build output and list files
+        run: |
+          Write-Host "Contents of oneclick_launcher/dist directory:"
+          Get-ChildItem -Path oneclick_launcher/dist -Recurse
+          if (Test-Path "oneclick_launcher/dist/oneclick_launcher.exe") {
+            Write-Host "✓ Found oneclick_launcher/dist/oneclick_launcher.exe"
+            $size = (Get-Item "oneclick_launcher/dist/oneclick_launcher.exe").length
+            Write-Host "Executable size: $([math]::Round($size/1MB, 2))MB"
+            exit 0
+          }
+          Write-Error "No executable found in dist directory!"
+          exit 1
+        shell: pwsh
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: oneclick-${{ github.run_number }}
+          name: OneClick ${{ github.run_number }} (${{ github.sha }})
+          draft: false
+          prerelease: false
+          files: |
+            oneclick_launcher/dist/oneclick_launcher.exe
