@@ -261,7 +261,12 @@ def read_config_file(
 
     try:
         return get_converter().structure(preconverted_config, config_class)
-    except cattrs.ClassValidationError as e:
+    except (
+        cattrs.ClassValidationError,
+        cattrs.StructureHandlerNotFoundError,
+        cattrs.ForbiddenExtraKeysError,
+        cattrs.IterableValidationError,
+    ) as e:
         raise ConfigFileParseError(
             msg="Error structuring config",
             config_class=config_class,
