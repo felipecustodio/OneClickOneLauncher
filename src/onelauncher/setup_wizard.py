@@ -31,12 +31,11 @@ from collections.abc import Iterable
 from contextlib import suppress
 from functools import partial
 from pathlib import Path
-from typing import Final
+from typing import Final, override
 
 import attrs
 import qtawesome
 from PySide6 import QtCore, QtGui, QtWidgets
-from typing_extensions import override
 
 from onelauncher.qtapp import get_app_style, get_qapp
 

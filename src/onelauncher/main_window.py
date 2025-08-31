@@ -30,7 +30,7 @@ from __future__ import annotations
 import logging
 from functools import partial
 from pathlib import Path
-from typing import cast
+from typing import cast, override
 
 import attrs
 import httpx
@@ -38,7 +38,6 @@ import packaging.version
 import qtawesome
 import trio
 from PySide6 import QtCore, QtGui, QtWidgets
-from typing_extensions import override
 from xmlschema import XMLSchemaValidationError
 
 from onelauncher.logs import ForwardLogsHandler

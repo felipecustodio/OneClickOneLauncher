@@ -1,12 +1,11 @@
 from collections.abc import Iterable
 from datetime import datetime
 from enum import StrEnum
-from typing import TypeAlias
+from typing import TypeAlias, override
 from uuid import uuid4
 
 import attrs
 from packaging.version import Version
-from typing_extensions import override
 
 from .__about__ import __title__
 from .addons.config import AddonsConfigSection
